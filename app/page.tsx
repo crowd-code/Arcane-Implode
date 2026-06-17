@@ -5,8 +5,8 @@ import Cauldron from '@/components/cauldron'
 import ParchmentTextarea from '@/components/parchment-textarea'
 import PotionCatalyst from '@/components/potion-catalyst'
 import CastIncendio from '@/components/cast-incendio'
-
-type PotionType = 'funny' | 'sarcastic' | 'comic' | 'movie' | 'poetry' | null
+import TextDestructionEffect from '@/components/text-destruction-effect'
+import type { PotionType } from '@/lib/potion-utils'
 
 const POTION_CATALYSTS = [
   { id: 'funny', label: 'Funny' },
@@ -21,30 +21,57 @@ export default function WitchesGrimoire() {
   const [selectedPotion, setSelectedPotion] = useState<PotionType>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [transmutedText, setTransmutedText] = useState('')
+  const [isDestructing, setIsDestructing] = useState(false)
+  const [isBoiling, setIsBoiling] = useState(false)
+  const [textToDestroy, setTextToDestroy] = useState('')
 
-  const handleCastIncendio = async () => {
-    if (!rawText.trim() || !selectedPotion) return
+  const handleDestructionComplete = async () => {
+    setIsDestructing(false)
+    
+    // Clear textarea and show boiling animation
+    setRawText('')
+    setIsBoiling(true)
 
+    // Boil for 1.5 seconds
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setIsBoiling(false)
+
+    // Begin text transmutation
     setIsLoading(true)
     try {
       // Simulate processing - in production, this would call an API
-      // Raw text is only in memory, never logged or persisted
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
       // Placeholder: transmute text using selected potion catalyst
-      const transmuted = `[${selectedPotion.toUpperCase()}] ${rawText.substring(0, 50)}...`
+      const transmuted = `[${selectedPotion?.toUpperCase()}] ${textToDestroy.substring(0, 50)}...`
       setTransmutedText(transmuted)
 
-      // Reset form after success
-      setRawText('')
+      // Reset state
+      setTextToDestroy('')
       setSelectedPotion(null)
     } finally {
       setIsLoading(false)
     }
   }
 
+  const handleCastIncendio = () => {
+    if (!rawText.trim() || !selectedPotion) return
+
+    // Initiate text destruction effect
+    setTextToDestroy(rawText)
+    setIsDestructing(true)
+  }
+
   return (
     <main className="min-h-screen w-full overflow-hidden bg-background flex flex-col items-center justify-center py-8 px-4">
+      {/* Text destruction effect overlay */}
+      <TextDestructionEffect
+        text={textToDestroy}
+        isActive={isDestructing}
+        onComplete={handleDestructionComplete}
+        duration={1200}
+      />
+
       {/* Mystical background particles */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {[...Array(8)].map((_, i) => (
@@ -71,7 +98,7 @@ export default function WitchesGrimoire() {
       </div>
 
       {/* Main Cauldron Section */}
-      <Cauldron>
+      <Cauldron isBoiling={isBoiling} potionType={selectedPotion}>
         <div className="w-full space-y-6 flex flex-col items-center justify-center">
           {/* Parchment Textarea */}
           <div className="w-full max-w-md">
@@ -102,7 +129,7 @@ export default function WitchesGrimoire() {
       <div className="mt-12 mb-8">
         <CastIncendio
           onClick={handleCastIncendio}
-          isLoading={isLoading}
+          isLoading={isLoading || isDestructing || isBoiling}
           disabled={!rawText.trim() || !selectedPotion}
         />
       </div>
