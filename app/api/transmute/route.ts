@@ -57,6 +57,8 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Calling OpenRouter API with potion:', selectedPotion)
 
     // Call OpenRouter API
+    const modelId = process.env.OPENROUTER_MODEL_ID || 'meta-llama/llama-3.1-8b-instruct'
+    
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.1-8b-instruct',
+        model: modelId,
         messages: [
           {
             role: 'system',
