@@ -36,19 +36,38 @@ export default function WitchesGrimoire() {
     await new Promise((resolve) => setTimeout(resolve, 1500))
     setIsBoiling(false)
 
-    // Begin text transmutation
+    // Begin text transmutation via API
     setIsLoading(true)
     try {
-      // Simulate processing - in production, this would call an API
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch('/api/transmute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userRant: textToDestroy,
+          selectedPotion,
+        }),
+      })
 
-      // Placeholder: transmute text using selected potion catalyst
-      const transmuted = `[${selectedPotion?.toUpperCase()}] ${textToDestroy.substring(0, 50)}...`
-      setTransmutedText(transmuted)
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('[v0] Transmutation failed:', errorData)
+        setTransmutedText(
+          'The transmutation failed. The spirits were not ready. Please try again.'
+        )
+        return
+      }
+
+      const data = await response.json()
+      setTransmutedText(data.transmutedText)
 
       // Reset state
       setTextToDestroy('')
       setSelectedPotion(null)
+    } catch (error) {
+      console.error('[v0] Transmutation error:', error)
+      setTransmutedText(
+        'An error occurred during transmutation. Please try again.'
+      )
     } finally {
       setIsLoading(false)
     }
