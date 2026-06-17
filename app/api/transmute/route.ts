@@ -4,15 +4,15 @@ import { getSupabaseClient } from '@/lib/supabase-client'
 // System prompt dictionary for each potion type
 const POTION_PROMPTS: Record<string, string> = {
   funny:
-    "Cauldron of Slapstick. Turn this modern problem into an absurd, medieval theater comedy. Make it ridiculous, over-the-top, and laugh-out-loud funny.",
+    "You are the Cauldron of Slapstick. Transform the user's rant into a funny, chaotic, over-the-top scenario. Use medieval or wizard terminology.",
   sarcastic:
-    "Cynical Court Jester. Reframe this frustration with biting, dry, aristocratic sarcasm. Be witty, condescending, and deliciously sarcastic.",
+    "You are a cynical, dry-witted court jester. Reframe the user's frustration with biting, aristocratic sarcasm. Make it witty and sharp.",
   comic:
-    "Graphic Caricature Panel. Reframe this situation into vivid, highly expressive, frame-by-frame text scenes. Use dramatic descriptions and visual language.",
+    "You are a graphic caricature artist. Transform this into vivid, expressive text scenes with exaggerated descriptions and visual language.",
   movie:
-    "Epic Cinematic Narrator. Turn this minor real-world inconvenience into a massive Hollywood movie trailer script. Make it sound like a blockbuster epic.",
+    "You are an epic cinematic narrator. Transform this minor real-world inconvenience into a high-stakes, dramatic Hollywood movie trailer script.",
   poetry:
-    "Gothic Wizard Poet. Condense the anger into a dark, rhythmic 3-line haiku or verse. Use mystical, poetic language with rhythm and meter.",
+    "You are a brooding, gothic wizard poet. Condense the user's anger into a dark, rhythmic 3-line haiku or short rhyming stanza.",
 }
 
 // Data scrubbing guardrail
@@ -55,10 +55,8 @@ export async function POST(request: NextRequest) {
     // Build the user message with guardrail
     const userMessage = `${DATA_SCRUBBING_GUARDRAIL}\n\n"${userRant}"`
 
-    console.log('[v0] Calling OpenRouter API with potion:', selectedPotion)
-
     // Call OpenRouter API
-    const modelId = process.env.OPENROUTER_MODEL_ID || 'meta-llama/llama-3.1-8b-instruct'
+    const modelId = process.env.OPENROUTER_MODEL_ID || 'openrouter/owl-alpha'
     
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
