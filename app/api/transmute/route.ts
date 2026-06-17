@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getSupabaseClient } from '@/lib/supabase-client'
 
 // System prompt dictionary for each potion type
 const POTION_PROMPTS: Record<string, string> = {
@@ -110,6 +111,28 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[v0] Transmutation successful')
+
+    // Insert into Supabase ledger (fire and forget - don't block response)
+    try {
+      const supabase = getSupabaseClient()
+
+      // Insert without awaiting to avoid blocking the response
+      supabase
+        .from('witches_ledger')
+        .insert({
+          potion_type: selectedPotion,
+          transmuted_text: transmutedText,
+        })
+        .then(() => {
+          console.log('[v0] Ledger entry saved successfully')
+        })
+        .catch((err) => {
+          console.error('[v0] Failed to save ledger entry:', err)
+        })
+    } catch (ledgerError) {
+      console.error('[v0] Ledger insert error (non-blocking):', ledgerError)
+      // Don't fail the main request if ledger insert fails
+    }
 
     return NextResponse.json({
       transmutedText,

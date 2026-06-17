@@ -6,6 +6,7 @@ import ParchmentTextarea from '@/components/parchment-textarea'
 import PotionCatalyst from '@/components/potion-catalyst'
 import CastIncendio from '@/components/cast-incendio'
 import TextDestructionEffect from '@/components/text-destruction-effect'
+import LedgerDisplay from '@/components/ledger-display'
 import type { PotionType } from '@/lib/potion-utils'
 
 const POTION_CATALYSTS = [
@@ -24,6 +25,8 @@ export default function WitchesGrimoire() {
   const [isDestructing, setIsDestructing] = useState(false)
   const [isBoiling, setIsBoiling] = useState(false)
   const [textToDestroy, setTextToDestroy] = useState('')
+  const [ledgerFilter, setLedgerFilter] = useState<PotionType>(null)
+  const [ledgerRefresh, setLedgerRefresh] = useState(0)
 
   const handleDestructionComplete = async () => {
     setIsDestructing(false)
@@ -59,6 +62,9 @@ export default function WitchesGrimoire() {
 
       const data = await response.json()
       setTransmutedText(data.transmutedText)
+
+      // Trigger ledger refresh
+      setLedgerRefresh((prev) => prev + 1)
 
       // Reset state
       setTextToDestroy('')
@@ -135,9 +141,12 @@ export default function WitchesGrimoire() {
                 key={potion.id}
                 label={potion.label}
                 isActive={selectedPotion === potion.id}
-                onClick={() =>
-                  setSelectedPotion(selectedPotion === potion.id ? null : (potion.id as PotionType))
-                }
+                onClick={() => {
+                  const newPotion = selectedPotion === potion.id ? null : (potion.id as PotionType)
+                  setSelectedPotion(newPotion)
+                  // Sync ledger filter with potion selection
+                  setLedgerFilter(newPotion)
+                }}
               />
             ))}
           </div>
@@ -164,12 +173,15 @@ export default function WitchesGrimoire() {
       )}
 
       {/* Footer note */}
-      <div className="mt-12 text-center text-xs text-muted-foreground max-w-md">
+      <div className="mt-12 text-center text-xs text-muted-foreground max-w-md mb-8">
         <p>
           ✨ All raw musings exist only in your browser&apos;s memory. They are never logged or stored.
           Only enchanted transmutations appear in The Witches&apos; Ledger. ✨
         </p>
       </div>
+
+      {/* The Witches' Ledger */}
+      <LedgerDisplay filterPotion={ledgerFilter} refreshTrigger={ledgerRefresh} />
     </main>
   )
 }
