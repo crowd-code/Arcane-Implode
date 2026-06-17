@@ -7,6 +7,7 @@ import PotionCatalyst from '@/components/potion-catalyst'
 import CastIncendio from '@/components/cast-incendio'
 import TextDestructionEffect from '@/components/text-destruction-effect'
 import LedgerDisplay from '@/components/ledger-display'
+import PhilosophyModal from '@/components/philosophy-modal'
 import type { PotionType } from '@/lib/potion-utils'
 
 const POTION_CATALYSTS = [
@@ -182,6 +183,11 @@ export default function WitchesGrimoire() {
 
       {/* The Witches' Ledger */}
       <LedgerDisplay filterPotion={ledgerFilter} refreshTrigger={ledgerRefresh} />
+
+      {/* Philosophy Link Footer */}
+      <div className="mt-16 text-center">
+        <PhilosophyModal />
+      </div>
     </main>
   )
 }
